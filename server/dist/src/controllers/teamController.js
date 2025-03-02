@@ -10,18 +10,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTeams = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = require("../lib/prisma");
 const getTeams = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const teams = yield prisma.team.findMany();
+        const teams = yield prisma_1.client.team.findMany();
         const teamsWithUsernames = yield Promise.all(teams.map((team) => __awaiter(void 0, void 0, void 0, function* () {
-            const productOwner = yield prisma.user.findUnique({
-                where: { userId: team.productOwnerUserId },
+            const productOwner = yield prisma_1.client.user.findUnique({
+                where: { userId: String(team.productOwnerUserId) },
                 select: { username: true },
             });
-            const projectManager = yield prisma.user.findUnique({
-                where: { userId: team.projectManagerUserId },
+            const projectManager = yield prisma_1.client.user.findUnique({
+                where: { userId: String(team.projectManagerUserId) },
                 select: { username: true },
             });
             return Object.assign(Object.assign({}, team), { productOwnerUsername: productOwner === null || productOwner === void 0 ? void 0 : productOwner.username, projectManagerUsername: projectManager === null || projectManager === void 0 ? void 0 : projectManager.username });
@@ -29,9 +28,7 @@ const getTeams = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(teamsWithUsernames);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: `Error retrieving teams: ${error.message}` });
+        res.status(500).json({ message: `Error retrieving teams: ${error.message}` });
     }
 });
 exports.getTeams = getTeams;
